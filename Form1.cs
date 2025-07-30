@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,12 +34,30 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            AppendLine("[TextBox tartalmának Mentése...]");
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "Text fájl (*.txt)|*.txt";
+                sfd.Title = "Mentés fájlba";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.WriteAllText(sfd.FileName, textBoxOutput.Text);
+                        MessageBox.Show("Sikeres mentés.", "Mentés", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Mentési hiba: " + ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         private void AppendLine(string text)
         {
-            textBoxOutput.AppendText(text + Environment.NewLine);
+            string timestamp = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] ");
+            textBoxOutput.AppendText(timestamp + text + Environment.NewLine);
         }
     }
 }
