@@ -31,7 +31,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             this.textBoxOutput = new System.Windows.Forms.TextBox();
             this.labelTextBoxOutput = new System.Windows.Forms.Label();
-            this.buttonStart = new System.Windows.Forms.Button();
+            this.buttonGo = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -54,14 +54,15 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.labelTextBoxOutput.Text = "A TextBoxban a DLL által generált értékek jelennek meg az új sorban megjelöléssel" +
     ":";
             // 
-            // buttonStart
+            // buttonGo
             // 
-            this.buttonStart.Location = new System.Drawing.Point(12, 234);
-            this.buttonStart.Name = "buttonStart";
-            this.buttonStart.Size = new System.Drawing.Size(75, 23);
-            this.buttonStart.TabIndex = 2;
-            this.buttonStart.Text = "Go";
-            this.buttonStart.UseVisualStyleBackColor = true;
+            this.buttonGo.Location = new System.Drawing.Point(12, 234);
+            this.buttonGo.Name = "buttonGo";
+            this.buttonGo.Size = new System.Drawing.Size(75, 23);
+            this.buttonGo.TabIndex = 2;
+            this.buttonGo.Text = "Go";
+            this.buttonGo.UseVisualStyleBackColor = true;
+            this.buttonGo.Click += new System.EventHandler(this.buttonGo_Click);
             // 
             // buttonStop
             // 
@@ -71,6 +72,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonStop.TabIndex = 3;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
             // buttonSave
             // 
@@ -80,6 +82,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonSave.TabIndex = 4;
             this.buttonSave.Text = "Mentés";
             this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
             // FormMain
             // 
@@ -88,7 +91,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.ClientSize = new System.Drawing.Size(634, 441);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonStop);
-            this.Controls.Add(this.buttonStart);
+            this.Controls.Add(this.buttonGo);
             this.Controls.Add(this.labelTextBoxOutput);
             this.Controls.Add(this.textBoxOutput);
             this.Name = "FormMain";
@@ -102,7 +105,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private System.Windows.Forms.TextBox textBoxOutput;
         private System.Windows.Forms.Label labelTextBoxOutput;
-        private System.Windows.Forms.Button buttonStart;
+        private System.Windows.Forms.Button buttonGo;
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.Button buttonSave;
     }
