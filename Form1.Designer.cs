@@ -41,6 +41,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.textBoxOutput.Location = new System.Drawing.Point(12, 45);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
+            this.textBoxOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxOutput.Size = new System.Drawing.Size(610, 183);
             this.textBoxOutput.TabIndex = 0;
             // 

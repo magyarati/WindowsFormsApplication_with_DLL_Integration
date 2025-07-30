@@ -16,6 +16,17 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            
+            Application.ThreadException += (sender, args) =>
+            {
+                MessageBox.Show("Nem kezelt hiba: " + args.Exception.Message, "Kritikus hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                MessageBox.Show("Végzetes hiba: " + ((Exception)args.ExceptionObject).Message, "Végzetes hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
+
             Application.Run(new FormMain());
         }
     }

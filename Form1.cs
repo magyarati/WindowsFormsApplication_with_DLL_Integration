@@ -20,7 +20,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
             getID = new GetID.GetID();
             getID.ValueChanged += getID_ValueChanged;
-
+            getID.ErrorChanged += getID_ErrorChanged;
         }
 
         private void buttonGo_Click(object sender, EventArgs e)
@@ -51,25 +51,52 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private async void buttonSave_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog sfd = new SaveFileDialog())
+            string content = textBoxOutput.Text;
+
+            while (true)
             {
-                sfd.Filter = "Text fájl (*.txt)|*.txt";
-                sfd.Title = "Mentés fájlba";
-                sfd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
-                if (sfd.ShowDialog() == DialogResult.OK)
+                using (SaveFileDialog sfd = new SaveFileDialog())
                 {
-                    try
+                    sfd.Filter = "Text fájl (*.txt)|*.txt";
+                    sfd.Title = "Mentés fájlba";
+                    sfd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    sfd.FileName = $"log_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
                     {
-                        string content = textBoxOutput.Text;
+                        try
+                        {
+                            string filePath = sfd.FileName;
 
-                        await Task.Run(() => File.WriteAllText(sfd.FileName, content));
+                            using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            using (StreamWriter writer = new StreamWriter(fs))
+                            {
+                                await writer.WriteAsync(content);
+                            }
 
-                        MessageBox.Show("Sikeres mentés.", "Mentés", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show("Sikeres mentés.", "Mentés", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            break;
+                        }
+                        catch (IOException ioex)
+                        {
+                            DialogResult retry = MessageBox.Show(
+                                $"Nem sikerült menteni, a fájl lehet, hogy használatban van:\n\n{ioex.Message}\n\nPróbálsz másik fájlt?",
+                                "Hiba mentéskor",
+                                MessageBoxButtons.RetryCancel,
+                                MessageBoxIcon.Warning);
+
+                            if (retry == DialogResult.Cancel)
+                                break;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ismeretlen hiba történt: {ex.Message}", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            break;
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        MessageBox.Show("Mentési hiba: " + ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
                     }
                 }
             }
@@ -82,6 +109,12 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 ? value + " – MEGFELELŐ"
                 : value + " – NEM MEGFELELŐ";
             AppendLine(result);
+        }
+
+        private void getID_ErrorChanged(object sender, EventArgs e)
+        {
+            string error = getID.ErrorMessage ?? "";
+            AppendLine("[HIBA]: " + error);
         }
 
         private void AppendLine(string text)
@@ -103,4 +136,3 @@ namespace WindowsFormsApplication_with_DLL_Integration
         }
     }
 }
-
