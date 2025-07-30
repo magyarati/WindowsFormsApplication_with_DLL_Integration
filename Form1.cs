@@ -49,18 +49,22 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
-        private void buttonSave_Click(object sender, EventArgs e)
+        private async void buttonSave_Click(object sender, EventArgs e)
         {
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
                 sfd.Filter = "Text fájl (*.txt)|*.txt";
                 sfd.Title = "Mentés fájlba";
+                sfd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        File.WriteAllText(sfd.FileName, textBoxOutput.Text);
+                        string content = textBoxOutput.Text;
+
+                        await Task.Run(() => File.WriteAllText(sfd.FileName, content));
+
                         MessageBox.Show("Sikeres mentés.", "Mentés", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -74,7 +78,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private void getID_ValueChanged(object sender, EventArgs e)
         {
             string value = getID.Value ?? "";
-            AppendLine(value);
+            string result = IsValid(value)
+                ? value + " – MEGFELELŐ"
+                : value + " – NEM MEGFELELŐ";
+            AppendLine(result);
         }
 
         private void AppendLine(string text)
@@ -90,6 +97,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
+        private bool IsValid(string value)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(value, @"^[A-Z]\d{4}$");
+        }
     }
 }
 
