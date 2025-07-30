@@ -19,17 +19,34 @@ namespace WindowsFormsApplication_with_DLL_Integration
             InitializeComponent();
 
             getID = new GetID.GetID();
+            getID.ValueChanged += getID_ValueChanged;
 
         }
 
         private void buttonGo_Click(object sender, EventArgs e)
         {
-            AppendLine("[Go eljárás elinditása...]");
+            try
+            {
+                getID.Go();
+                AppendLine(">> GO eljárás elindítva");
+            }
+            catch (Exception ex)
+            {
+                AppendLine("[HIBA] Start: " + ex.Message);
+            }
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            AppendLine("[Stop eljárás elinditása...]");
+            try
+            {
+                getID.Stop();
+                AppendLine(">> STOP eljárás elindítva");
+            }
+            catch (Exception ex)
+            {
+                AppendLine("[HIBA] Stop: " + ex.Message);
+            }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -54,11 +71,25 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
+        private void getID_ValueChanged(object sender, EventArgs e)
+        {
+            string value = getID.Value ?? "";
+            AppendLine(value);
+        }
+
         private void AppendLine(string text)
         {
-            string timestamp = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] ");
-            textBoxOutput.AppendText(timestamp + text + Environment.NewLine);
+            if (textBoxOutput.InvokeRequired)
+            {
+                textBoxOutput.Invoke(new Action<string>(AppendLine), text);
+            }
+            else
+            {
+                string timestamp = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] ");
+                textBoxOutput.AppendText(timestamp + text + Environment.NewLine);
+            }
         }
+
     }
 }
 
