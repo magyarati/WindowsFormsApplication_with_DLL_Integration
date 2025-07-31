@@ -361,7 +361,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-# Exceptions from bin/Release – follow exe and dll files
-!Bin/Release/*.exe
-!Bin/Release/*.dll
