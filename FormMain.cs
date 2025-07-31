@@ -15,12 +15,14 @@ namespace WindowsFormsApplication_with_DLL_Integration
     public partial class FormMain : Form
     {
         private readonly GetID.GetID getID;
-        private readonly StringBuilder logBuffer = new StringBuilder();
         private readonly object logLock = new object();
+        private readonly Logger logger;
 
         public FormMain()
         {
             InitializeComponent();
+
+            logger = new Logger(textBoxOutput);
 
             getID = new GetID.GetID();
             getID.ValueChanged += getID_ValueChanged;
@@ -40,17 +42,17 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 if (!getID.Running)
                 {
                     getID.Go();
-                    AppendLine(">> GO eljárás elindítva");
+                    logger.AppendLine(">> GO eljárás elindítva");
                     UpdateRunningState();
                 }
                 else
                 {
-                    AppendLine(">> Már fut a GO eljárás, újraindítás nem történt.");
+                    logger.AppendLine(">> Már fut a GO eljárás, újraindítás nem történt.");
                 }
             }
             catch (Exception ex)
             {
-                AppendLine("[HIBA] Start: " + ex.Message);
+                logger.AppendLine("[HIBA] Start: " + ex.Message);
             }
         }
 
@@ -61,17 +63,17 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 if (getID.Running)
                 {
                     getID.Stop();
-                    AppendLine(">> STOP eljárás elindítva");
+                    logger.AppendLine(">> STOP eljárás elindítva");
                     UpdateRunningState();
                 }
                 else
                 {
-                    AppendLine(">> A GO eljárás nem fut.");
+                    logger.AppendLine(">> A GO eljárás nem fut.");
                 }
             }
             catch (Exception ex)
             {
-                AppendLine("[HIBA] Stop: " + ex.Message);
+                logger.AppendLine("[HIBA] Stop: " + ex.Message);
             }
         }
 
@@ -93,7 +95,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
                             string content;
                             lock (logLock)
                             {
-                                content = logBuffer.ToString();
+                                content = logger.GetContent();
                             }
 
                             await Task.Run(() =>
@@ -105,12 +107,12 @@ namespace WindowsFormsApplication_with_DLL_Integration
                                 }
                             });
 
-                            AppendLine($">> Log sikeresen elmentve: {sfd.FileName}");
+                            logger.AppendLine($">> Log sikeresen elmentve: {sfd.FileName}");
                             break;
                         }
                         catch (IOException ioex)
                         {
-                            AppendLine($"[HIBA] Mentés sikertelen, fájl használatban lehet: {ioex.Message}");
+                            logger.AppendLine($"[HIBA] Mentés sikertelen, fájl használatban lehet: {ioex.Message}");
                             DialogResult retry = MessageBox.Show(
                                 $"Nem sikerült menteni, a fájl lehet, hogy használatban van:\n\n{ioex.Message}\n\nPróbálsz másik fájlt?",
                                 "Hiba mentéskor",
@@ -119,19 +121,19 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
                             if (retry == DialogResult.Cancel)
                             {
-                                AppendLine(">> Felhasználó megszakította a mentést.");
+                                logger.AppendLine(">> Felhasználó megszakította a mentést.");
                                 break;
                             }
                         }
                         catch (Exception ex)
                         {
-                            AppendLine($"[HIBA] Ismeretlen mentési hiba: {ex.Message}");
+                            logger.AppendLine($"[HIBA] Ismeretlen mentési hiba: {ex.Message}");
                             break;
                         }
                     }
                     else
                     {
-                        AppendLine(">> Mentés megszakítva, nem lett fájl kiválasztva.");
+                        logger.AppendLine(">> Mentés megszakítva, nem lett fájl kiválasztva.");
                         break;
                     }
                 }
@@ -146,38 +148,18 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 string result = IsValid(value)
                     ? value + " – MEGFELELŐ"
                     : value + " – NEM MEGFELELŐ";
-                AppendLine(result);
+                logger.AppendLine(result);
             }
             catch (Exception ex)
             {
-                AppendLine("[HIBA] ValueChanged: " + ex.Message);
+                logger.AppendLine("[HIBA] ValueChanged: " + ex.Message);
             }
         }
 
         private void getID_ErrorChanged(object sender, EventArgs e)
         {
             string error = getID.ErrorMessage ?? "";
-            AppendLine("[HIBA]: " + error);
-        }
-
-        private void AppendLine(string text)
-        {
-            string timestamp = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] ");
-            string fullLine = timestamp + text + Environment.NewLine;
-
-            lock (logLock)
-            {
-                logBuffer.Append(fullLine);
-            }
-
-            if (textBoxOutput.InvokeRequired)
-            {
-                textBoxOutput.Invoke(new Action(() => textBoxOutput.AppendText(fullLine)));
-            }
-            else
-            {
-                textBoxOutput.AppendText(fullLine);
-            }
+            logger.AppendLine("[HIBA]: " + error);
         }
 
         private bool IsValid(string value)
