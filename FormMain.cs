@@ -15,14 +15,15 @@ namespace WindowsFormsApplication_with_DLL_Integration
     public partial class FormMain : Form
     {
         private readonly GetID.GetID getID;
-        private readonly object logLock = new object();
         private readonly Logger logger;
+        private readonly SaveHandler saveHandler;
 
         public FormMain()
         {
             InitializeComponent();
 
             logger = new Logger(textBoxOutput);
+            saveHandler = new SaveHandler();
 
             getID = new GetID.GetID();
             getID.ValueChanged += getID_ValueChanged;
@@ -79,65 +80,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private async void buttonSave_Click(object sender, EventArgs e)
         {
-            while (true)
-            {
-                using (SaveFileDialog sfd = new SaveFileDialog())
-                {
-                    sfd.Filter = "Text fájl (*.txt)|*.txt";
-                    sfd.Title = "Mentés fájlba";
-                    sfd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    sfd.FileName = $"log_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-
-                    if (sfd.ShowDialog() == DialogResult.OK)
-                    {
-                        try
-                        {
-                            string content;
-                            lock (logLock)
-                            {
-                                content = logger.GetContent();
-                            }
-
-                            await Task.Run(() =>
-                            {
-                                using (FileStream fs = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                                using (StreamWriter writer = new StreamWriter(fs))
-                                {
-                                    writer.Write(content);
-                                }
-                            });
-
-                            logger.AppendLine($">> Log sikeresen elmentve: {sfd.FileName}");
-                            break;
-                        }
-                        catch (IOException ioex)
-                        {
-                            logger.AppendLine($"[HIBA] Mentés sikertelen, fájl használatban lehet: {ioex.Message}");
-                            DialogResult retry = MessageBox.Show(
-                                $"Nem sikerült menteni, a fájl lehet, hogy használatban van:\n\n{ioex.Message}\n\nPróbálsz másik fájlt?",
-                                "Hiba mentéskor",
-                                MessageBoxButtons.RetryCancel,
-                                MessageBoxIcon.Warning);
-
-                            if (retry == DialogResult.Cancel)
-                            {
-                                logger.AppendLine(">> Felhasználó megszakította a mentést.");
-                                break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.AppendLine($"[HIBA] Ismeretlen mentési hiba: {ex.Message}");
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        logger.AppendLine(">> Mentés megszakítva, nem lett fájl kiválasztva.");
-                        break;
-                    }
-                }
-            }
+            await saveHandler.SaveLogAsync(
+                getContent: () => logger.GetContent(),
+                log: msg => logger.AppendLine(msg)
+            );
         }
 
         private void getID_ValueChanged(object sender, EventArgs e)
