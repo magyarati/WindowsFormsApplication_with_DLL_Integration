@@ -29,20 +29,25 @@ namespace WindowsFormsApplication_with_DLL_Integration
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.textBoxOutput = new System.Windows.Forms.TextBox();
             this.labelTextBoxOutput = new System.Windows.Forms.Label();
             this.buttonGo = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
+            this.labelStatus = new System.Windows.Forms.Label();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // textBoxOutput
             // 
+            this.textBoxOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxOutput.Location = new System.Drawing.Point(12, 45);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxOutput.Size = new System.Drawing.Size(610, 183);
+            this.textBoxOutput.Size = new System.Drawing.Size(932, 183);
             this.textBoxOutput.TabIndex = 0;
             // 
             // labelTextBoxOutput
@@ -85,11 +90,23 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
+            // labelStatus
+            // 
+            this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelStatus.AutoSize = true;
+            this.labelStatus.Location = new System.Drawing.Point(838, 244);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.labelStatus.Size = new System.Drawing.Size(86, 13);
+            this.labelStatus.TabIndex = 5;
+            this.labelStatus.Text = "Állapot: Leállítva";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(634, 441);
+            this.ClientSize = new System.Drawing.Size(956, 441);
+            this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonGo);
@@ -109,6 +126,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.Button buttonGo;
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Label labelStatus;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
 

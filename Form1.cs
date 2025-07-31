@@ -25,14 +25,28 @@ namespace WindowsFormsApplication_with_DLL_Integration
             getID = new GetID.GetID();
             getID.ValueChanged += getID_ValueChanged;
             getID.ErrorChanged += getID_ErrorChanged;
+
+            toolTip.SetToolTip(buttonGo, "Elindítja a GO eljárást, ha az még nem fut.");
+            toolTip.SetToolTip(buttonStop, "Leállítja a GO eljárást, ha éppen fut.");
+            toolTip.SetToolTip(buttonSave, "Menti fájlba a TextBox tartalmát.");
+
+            UpdateRunningState();
         }
 
         private void buttonGo_Click(object sender, EventArgs e)
         {
             try
             {
-                getID.Go();
-                AppendLine(">> GO eljárás elindítva");
+                if (!getID.Running)
+                {
+                    getID.Go();
+                    AppendLine(">> GO eljárás elindítva");
+                    UpdateRunningState();
+                }
+                else
+                {
+                    AppendLine(">> Már fut a GO eljárás, újraindítás nem történt.");
+                }
             }
             catch (Exception ex)
             {
@@ -44,8 +58,16 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
-                getID.Stop();
-                AppendLine(">> STOP eljárás elindítva");
+                if (getID.Running)
+                {
+                    getID.Stop();
+                    AppendLine(">> STOP eljárás elindítva");
+                    UpdateRunningState();
+                }
+                else
+                {
+                    AppendLine(">> A GO eljárás nem fut.");
+                }
             }
             catch (Exception ex)
             {
@@ -83,11 +105,12 @@ namespace WindowsFormsApplication_with_DLL_Integration
                                 }
                             });
 
-                            MessageBox.Show("Sikeres mentés.", "Mentés", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            AppendLine($">> Log sikeresen elmentve: {sfd.FileName}");
                             break;
                         }
                         catch (IOException ioex)
                         {
+                            AppendLine($"[HIBA] Mentés sikertelen, fájl használatban lehet: {ioex.Message}");
                             DialogResult retry = MessageBox.Show(
                                 $"Nem sikerült menteni, a fájl lehet, hogy használatban van:\n\n{ioex.Message}\n\nPróbálsz másik fájlt?",
                                 "Hiba mentéskor",
@@ -95,16 +118,20 @@ namespace WindowsFormsApplication_with_DLL_Integration
                                 MessageBoxIcon.Warning);
 
                             if (retry == DialogResult.Cancel)
+                            {
+                                AppendLine(">> Felhasználó megszakította a mentést.");
                                 break;
+                            }
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"Ismeretlen hiba történt: {ex.Message}", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            AppendLine($"[HIBA] Ismeretlen mentési hiba: {ex.Message}");
                             break;
                         }
                     }
                     else
                     {
+                        AppendLine(">> Mentés megszakítva, nem lett fájl kiválasztva.");
                         break;
                     }
                 }
@@ -156,6 +183,21 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private bool IsValid(string value)
         {
             return Regex.IsMatch(value, @"^[A-Z]\d{4}$");
+        }
+
+        private void UpdateRunningState()
+        {
+            bool isRunning = getID.Running;
+            string status = isRunning ? "Állapot: Futtatás alatt" : "Állapot: Leállítva";
+
+            if (labelStatus.InvokeRequired)
+            {
+                labelStatus.Invoke(new Action(() => labelStatus.Text = status));
+            }
+            else
+            {
+                labelStatus.Text = status;
+            }
         }
     }
 }
