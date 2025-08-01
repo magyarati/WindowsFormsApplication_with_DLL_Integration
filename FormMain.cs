@@ -14,10 +14,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
 {
     public partial class FormMain : Form
     {
-        private readonly GetID.GetID getID;
+        private GetIDWorker _singleWorker;
+        private readonly List<GetIDWorker> _multiWorkers = new List<GetIDWorker>();
+
         private readonly BatchingLogger logger;
         private readonly SaveHandler saveHandler;
-        private readonly List<GetID.GetID> multiGetIDInstances = new List<GetID.GetID>();
 
         public FormMain()
         {
@@ -26,9 +27,9 @@ namespace WindowsFormsApplication_with_DLL_Integration
             logger = new BatchingLogger(textBoxOutput, flushIntervalMs: 100);
             saveHandler = new SaveHandler();
 
-            getID = new GetID.GetID();
-            getID.ValueChanged += getID_ValueChanged;
-            getID.ErrorChanged += getID_ErrorChanged;
+            _singleWorker = new GetIDWorker();
+            _singleWorker.ValueReceived += (s, v) => LoggerLog(v, 0);
+            _singleWorker.ErrorReceived += (s, e) => LoggerError(e, 0);
 
             toolTip.SetToolTip(buttonGo, "Elindítja a GO eljárást, ha az még nem fut.");
             toolTip.SetToolTip(buttonGoAnyway, "Elindítja a GO eljárást mindenképpen.");
@@ -41,13 +42,52 @@ namespace WindowsFormsApplication_with_DLL_Integration
             UpdateRunningState();
         }
 
+        private bool IsValid(string value) =>
+            Regex.IsMatch(value, @"^[A-Z]\d{4}$");
+
+        private void LoggerLog(string value, int idx)
+        {
+            string suffix = idx == 0 ? "" : $" (#{idx})";
+            string text = IsValid(value)
+                ? $"{value} – MEGFELELŐ{suffix}"
+                : $"{value} – NEM MEGFELELŐ{suffix}";
+            logger.AppendLine(text);
+        }
+
+        private void LoggerError(string error, int idx)
+        {
+            string suffix = idx == 0 ? "" : $" (#{idx})";
+            logger.AppendLine($"[HIBA]{suffix}: {error}");
+        }
+
+        private void UpdateRunningState()
+        {
+            string singleText = _singleWorker.Running
+                ? "Állapot: Futtatás alatt"
+                : "Állapot: Leállítva";
+
+            int multiRunning = _multiWorkers.Count(w => w.Running);
+            string multiText = $"Állapot: {multiRunning} szál fut";
+
+            SetLabelTextSafe(labelStatus, singleText);
+            SetLabelTextSafe(labelMultiStatus, multiText);
+        }
+
+        private void SetLabelTextSafe(Label lbl, string text)
+        {
+            if (lbl.InvokeRequired)
+                lbl.Invoke(new Action(() => lbl.Text = text));
+            else
+                lbl.Text = text;
+        }
+
         private void buttonGo_Click(object sender, EventArgs e)
         {
             try
             {
-                if (!getID.Running)
+                if (!_singleWorker.Running)
                 {
-                    getID.Go();
+                    _singleWorker.Start();
                     logger.AppendLine(">> GO eljárás elindítva");
                     UpdateRunningState();
                 }
@@ -66,9 +106,9 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
-                if (getID.Running)
+                if (_singleWorker.Running)
                 {
-                    getID.Stop();
+                    _singleWorker.Stop();
                     logger.AppendLine(">> STOP eljárás elindítva");
                     UpdateRunningState();
                 }
@@ -83,153 +123,102 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
-        private async void buttonSave_Click(object sender, EventArgs e)
-        {
-            await saveHandler.SaveLogAsync(
-                getContent: () => logger.GetContent(),
-                log: msg => logger.AppendLine(msg)
-            );
-        }
-
-        private void getID_ValueChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                string value = getID.Value ?? "";
-                string result = IsValid(value)
-                    ? value + " – MEGFELELŐ"
-                    : value + " – NEM MEGFELELŐ";
-                logger.AppendLine(result);
-            }
-            catch (Exception ex)
-            {
-                logger.AppendLine("[HIBA] ValueChanged: " + ex.Message);
-            }
-        }
-
-        private void getID_ErrorChanged(object sender, EventArgs e)
-        {
-            string error = getID.ErrorMessage ?? "";
-            logger.AppendLine("[HIBA]: " + error);
-        }
-
-        private void multiGetID_ValueChanged(object sender, EventArgs e)
-        {
-            var inst = sender as GetID.GetID;
-            int idx = multiGetIDInstances.IndexOf(inst) + 1;
-            string value = inst.Value ?? "";
-            string result = IsValid(value)
-                ? $"{value} – MEGFELELŐ (#{idx})"
-                : $"{value} – NEM MEGFELELŐ (#{idx})";
-            logger.AppendLine(result);
-        }
-
-        private void multiGetID_ErrorChanged(object sender, EventArgs e)
-        {
-            var inst = sender as GetID.GetID;
-            int idx = multiGetIDInstances.IndexOf(inst) + 1;
-            string error = inst.ErrorMessage ?? "";
-            logger.AppendLine($"[HIBA] (#{idx}): {error}");
-        }
-
-        private bool IsValid(string value)
-        {
-            return Regex.IsMatch(value, @"^[A-Z]\d{4}$");
-        }
-
-        private void UpdateRunningState()
-        {
-            bool singleRunning = getID.Running;
-            string singleText = singleRunning
-                ? "Állapot: Futtatás alatt"
-                : "Állapot: Leállítva";
-
-            int multiRunning = multiGetIDInstances.Count(inst => inst.Running);
-            string multiText = $"Állapot: {multiRunning} szál fut";
-
-            SetLabelTextSafe(labelStatus, singleText);
-            SetLabelTextSafe(labelMultiStatus, multiText);
-        }
-
-        private void SetLabelTextSafe(Label lbl, string text)
-        {
-            if (lbl.InvokeRequired)
-                lbl.Invoke(new Action(() => lbl.Text = text));
-            else
-                lbl.Text = text;
-        }
-
-        private void buttonMultiGo_Click(object sender, EventArgs e)
-        {
-            foreach (var inst in multiGetIDInstances)
-                if (inst.Running) inst.Stop();
-            multiGetIDInstances.Clear();
-
-            int darab = (int)multiGetIDs.Value;
-            if (darab < 1)
-            {
-                logger.AppendLine(">> MultiGo: érvénytelen darabszám.");
-                return;
-            }
-
-            for (int i = 1; i <= darab; i++)
-            {
-                var inst = new GetID.GetID();
-
-                inst.ValueChanged += multiGetID_ValueChanged;
-                inst.ErrorChanged += multiGetID_ErrorChanged;
-
-                inst.Go();
-                multiGetIDInstances.Add(inst);
-
-                logger.AppendLine($">> Multi GO eljárás indítva: példány #{i}");
-            }
-
-            logger.AppendLine($">> Összesen {multiGetIDInstances.Count} példány fut.");
-            UpdateRunningState();
-        }
-
-        private void buttonMultiStop_Click(object sender, EventArgs e)
-        {
-            if (multiGetIDInstances.Count == 0)
-            {
-                logger.AppendLine(">> Nincsenek futó Multi-példányok.");
-                return;
-            }
-
-            int stopped = 0;
-            foreach (var inst in multiGetIDInstances)
-            {
-                if (inst.Running)
-                {
-                    inst.Stop();
-                    stopped++;
-                }
-            }
-
-            logger.AppendLine($">> Leállítva {stopped} multi-példány.");
-            multiGetIDInstances.Clear();
-            UpdateRunningState();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-            logger.Dispose();
-        }
-
         private void buttonGoAnyway_Click(object sender, EventArgs e)
         {
             try
             {
-                getID.Go();
-                logger.AppendLine(">> GO eljárás elindítva");
+                _singleWorker.Start();
+                logger.AppendLine(">> GO eljárás mindenképpen elindítva");
                 UpdateRunningState();
             }
             catch (Exception ex)
             {
                 logger.AppendLine("[HIBA] Start: " + ex.Message);
             }
+        }
+
+        private async void buttonSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                await saveHandler.SaveLogAsync(
+                    getContent: () => logger.GetContent(),
+                    log: msg => logger.AppendLine(msg));
+            }
+            catch (Exception ex)
+            {
+                logger.AppendLine("[HIBA] Mentés: " + ex.Message);
+            }
+        }
+
+        private void buttonMultiGo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Parallel.ForEach(_multiWorkers, w => w.Dispose());
+                _multiWorkers.Clear();
+
+                int darab = (int)multiGetIDs.Value;
+                if (darab < 1)
+                {
+                    logger.AppendLine(">> MultiGo: érvénytelen darabszám.");
+                    return;
+                }
+
+                for (int i = 0; i < darab; i++)
+                {
+                    var worker = new GetIDWorker();
+                    int idx = i + 1;
+                    worker.ValueReceived += (s, v) => LoggerLog(v, idx);
+                    worker.ErrorReceived += (s, err) => LoggerError(err, idx);
+                    _multiWorkers.Add(worker);
+                }
+
+                Parallel.For(0, _multiWorkers.Count, i =>
+                {
+                    _multiWorkers[i].Start();
+                    logger.AppendLine($">> Multi GO eljárás indítva: példány #{i + 1}");
+                });
+
+                logger.AppendLine($">> Összesen {_multiWorkers.Count} példány fut.");
+                UpdateRunningState();
+            }
+            catch (Exception ex)
+            {
+                logger.AppendLine("[HIBA] MultiGo: " + ex.Message);
+            }
+        }
+
+        private void buttonMultiStop_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_multiWorkers.Count == 0)
+                {
+                    logger.AppendLine(">> Nincsenek futó Multi-példányok.");
+                    return;
+                }
+
+                Parallel.ForEach(_multiWorkers, w => w.Dispose());
+                logger.AppendLine($">> Leállítva {_multiWorkers.Count} multi-példány.");
+                _multiWorkers.Clear();
+                UpdateRunningState();
+            }
+            catch (Exception ex)
+            {
+                logger.AppendLine("[HIBA] MultiStop: " + ex.Message);
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            _singleWorker.Dispose();
+            foreach (var w in _multiWorkers)
+                w.Dispose();
+
+            logger.Dispose();
         }
     }
 }
