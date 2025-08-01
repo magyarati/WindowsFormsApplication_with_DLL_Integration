@@ -28,10 +28,21 @@ namespace WindowsFormsApplication_with_DLL_Integration
                     }
 
                     string content = getContent();
+                    byte[] data = Encoding.UTF8.GetBytes(content);
 
                     try
                     {
-                        await Task.Run(() => File.WriteAllText(sfd.FileName, content));
+                        using (var fs = new FileStream(
+                            sfd.FileName,
+                            FileMode.Create,
+                            FileAccess.Write,
+                            FileShare.None,
+                            bufferSize: 4096,
+                            useAsync: true))
+                        {
+                            await fs.WriteAsync(data, 0, data.Length);
+                            await fs.FlushAsync();
+                        }
 
                         log($">> Log sikeresen elmentve: {sfd.FileName}");
                         return;
@@ -50,7 +61,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
                             log(">> Felhasználó megszakította a mentést.");
                             return;
                         }
-
                     }
                     catch (Exception ex)
                     {
