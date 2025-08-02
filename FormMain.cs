@@ -12,8 +12,20 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication_with_DLL_Integration
 {
-    public partial class FormMain : Form
+    public partial class FormMain : Form, IMainView
     {
+        public event EventHandler GoRequested;
+        public event EventHandler StopRequested;
+        public event EventHandler SaveRequested;
+        public event EventHandler MultiGoRequested;
+        public event EventHandler MultiStopRequested;
+
+        public int MultiGetIDsValue => (int)multiGetIDs.Value;
+
+        public void DisplayLog(string text) => logger.AppendLine(text);
+        public void UpdateSingleStatus(string s) => SetLabelTextSafe(labelStatus, s);
+        public void UpdateMultiStatus(string s) => SetLabelTextSafe(labelMultiStatus, s);
+        
         private GetIDWorker _singleWorker;
         private readonly List<GetIDWorker> _multiWorkers = new List<GetIDWorker>();
         private readonly ISaveHandler saveHandler;
@@ -30,7 +42,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             checkBoxShowTimestamps,
             checkBoxShowLineNumbers,
             flushIntervalMs: 100,
-            maxChars: 2_000_000);
+            maxChars: 20_000_000);
 
 
             _singleWorker = new GetIDWorker();
@@ -90,6 +102,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
+                GoRequested?.Invoke(this, EventArgs.Empty);
                 if (!_singleWorker.Running || checkBoxIgnoreRunningState.Checked)
                 {
                     _singleWorker.Start();
@@ -109,6 +122,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            StopRequested?.Invoke(this, EventArgs.Empty);
             try
             {
                 if (_singleWorker.Running || checkBoxIgnoreRunningState.Checked)
@@ -128,22 +142,9 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
-        private void buttonGoAnyway_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _singleWorker.Start();
-                logger.AppendLine(">> GO eljárás mindenképpen elindítva");
-                UpdateRunningState();
-            }
-            catch (Exception ex)
-            {
-                logger.AppendLine("[HIBA] Start: " + ex.Message);
-            }
-        }
-
         private async void buttonSave_Click(object sender, EventArgs e)
         {
+            SaveRequested?.Invoke(this, EventArgs.Empty);
             try
             {
                 await saveHandler.SaveLogAsync(
@@ -159,6 +160,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private void buttonMultiGo_Click(object sender, EventArgs e)
         {
+            MultiGoRequested?.Invoke(this, EventArgs.Empty);
             try
             {
                 Parallel.ForEach(_multiWorkers, w => w.Dispose());
@@ -197,6 +199,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private void buttonMultiStop_Click(object sender, EventArgs e)
         {
+            MultiStopRequested?.Invoke(this, EventArgs.Empty);
             try
             {
                 if (_multiWorkers.Count == 0)
