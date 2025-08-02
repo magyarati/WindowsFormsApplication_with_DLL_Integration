@@ -16,23 +16,28 @@ namespace WindowsFormsApplication_with_DLL_Integration
     {
         private GetIDWorker _singleWorker;
         private readonly List<GetIDWorker> _multiWorkers = new List<GetIDWorker>();
-
+        private readonly ISaveHandler saveHandler;
         private readonly BatchingLogger logger;
-        private readonly SaveHandler saveHandler;
 
         public FormMain()
         {
             InitializeComponent();
 
-            logger = new BatchingLogger(textBoxOutput, flushIntervalMs: 100);
             saveHandler = new SaveHandler();
+            logger = new BatchingLogger(
+            textBoxOutput,
+            saveHandler,
+            checkBoxShowTimestamps,
+            checkBoxShowLineNumbers,
+            flushIntervalMs: 100,
+            maxChars: 2_000_000);
+
 
             _singleWorker = new GetIDWorker();
             _singleWorker.ValueReceived += (s, v) => LoggerLog(v, 0);
             _singleWorker.ErrorReceived += (s, e) => LoggerError(e, 0);
 
             toolTip.SetToolTip(buttonGo, "Elindítja a GO eljárást, ha az még nem fut.");
-            toolTip.SetToolTip(buttonGoAnyway, "Elindítja a GO eljárást mindenképpen.");
             toolTip.SetToolTip(buttonStop, "Leállítja a GO eljárást, ha éppen fut.");
             toolTip.SetToolTip(buttonSave, "Menti fájlba a TextBox tartalmát.");
             toolTip.SetToolTip(buttonMultiGo, "Elindítja a GO eljárást több példányban a beállított darabszámmal");
@@ -85,7 +90,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
-                if (!_singleWorker.Running)
+                if (!_singleWorker.Running || checkBoxIgnoreRunningState.Checked)
                 {
                     _singleWorker.Start();
                     logger.AppendLine(">> GO eljárás elindítva");
@@ -106,7 +111,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
-                if (_singleWorker.Running)
+                if (_singleWorker.Running || checkBoxIgnoreRunningState.Checked)
                 {
                     _singleWorker.Stop();
                     logger.AppendLine(">> STOP eljárás elindítva");
@@ -142,8 +147,9 @@ namespace WindowsFormsApplication_with_DLL_Integration
             try
             {
                 await saveHandler.SaveLogAsync(
-                    getContent: () => logger.GetContent(),
-                    log: msg => logger.AppendLine(msg));
+                    () => logger.GetContent(),
+                    msg => logger.AppendLine(msg),
+                    silent: false);
             }
             catch (Exception ex)
             {
