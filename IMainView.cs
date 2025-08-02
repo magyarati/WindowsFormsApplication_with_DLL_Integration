@@ -15,6 +15,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         event EventHandler MultiStopRequested;
 
         int MultiGetIDsValue { get; }
+        bool IgnoreRunningState { get; }
 
         void DisplayLog(string text);
         void UpdateSingleStatus(string status);

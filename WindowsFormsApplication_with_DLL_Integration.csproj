@@ -60,6 +60,7 @@
     <Compile Include="GetIDWorker.cs" />
     <Compile Include="IMainView.cs" />
     <Compile Include="ISaveHandler.cs" />
+    <Compile Include="MainPresenter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveHandler.cs" />
