@@ -11,15 +11,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
         event EventHandler GoRequested;
         event EventHandler StopRequested;
         event EventHandler SaveRequested;
-        event EventHandler MultiGoRequested;
-        event EventHandler MultiStopRequested;
 
-        int MultiGetIDsValue { get; }
         bool IgnoreRunningState { get; }
 
         void DisplayLog(string text);
         void UpdateSingleStatus(string status);
-        void UpdateMultiStatus(string status);
         void UpdateMemoryStatus(string formatted);
         void UpdateTextboxMemoryStatus(string formatted);
     }

@@ -39,19 +39,14 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.grpSingleOperations = new System.Windows.Forms.GroupBox();
             this.grpMultiOperations = new System.Windows.Forms.GroupBox();
+            this.labelTextboxMemory = new System.Windows.Forms.Label();
+            this.labelMemory = new System.Windows.Forms.Label();
             this.checkBoxIgnoreRunningState = new System.Windows.Forms.CheckBox();
             this.checkBoxShowTimestamps = new System.Windows.Forms.CheckBox();
             this.checkBoxShowLineNumbers = new System.Windows.Forms.CheckBox();
-            this.multiGetIDs = new System.Windows.Forms.NumericUpDown();
-            this.labelMultiStatus = new System.Windows.Forms.Label();
-            this.buttonMultiStop = new System.Windows.Forms.Button();
-            this.buttonMultiGo = new System.Windows.Forms.Button();
             this._statusTimer = new System.Windows.Forms.Timer(this.components);
-            this.labelMemory = new System.Windows.Forms.Label();
-            this.labelTextboxMemory = new System.Windows.Forms.Label();
             this.grpSingleOperations.SuspendLayout();
             this.grpMultiOperations.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.multiGetIDs)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxOutput
@@ -140,16 +135,34 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.grpMultiOperations.Controls.Add(this.checkBoxIgnoreRunningState);
             this.grpMultiOperations.Controls.Add(this.checkBoxShowTimestamps);
             this.grpMultiOperations.Controls.Add(this.checkBoxShowLineNumbers);
-            this.grpMultiOperations.Controls.Add(this.multiGetIDs);
-            this.grpMultiOperations.Controls.Add(this.labelMultiStatus);
-            this.grpMultiOperations.Controls.Add(this.buttonMultiStop);
-            this.grpMultiOperations.Controls.Add(this.buttonMultiGo);
             this.grpMultiOperations.Location = new System.Drawing.Point(12, 312);
             this.grpMultiOperations.Name = "grpMultiOperations";
             this.grpMultiOperations.Size = new System.Drawing.Size(931, 170);
             this.grpMultiOperations.TabIndex = 3;
             this.grpMultiOperations.TabStop = false;
             this.grpMultiOperations.Text = "Kiegészítő beállítások";
+            // 
+            // labelTextboxMemory
+            // 
+            this.labelTextboxMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTextboxMemory.AutoSize = true;
+            this.labelTextboxMemory.Location = new System.Drawing.Point(737, 43);
+            this.labelTextboxMemory.Name = "labelTextboxMemory";
+            this.labelTextboxMemory.Size = new System.Drawing.Size(157, 13);
+            this.labelTextboxMemory.TabIndex = 8;
+            this.labelTextboxMemory.Text = "TextBox tartalom:               0 KB";
+            // 
+            // labelMemory
+            // 
+            this.labelMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelMemory.AutoSize = true;
+            this.labelMemory.Location = new System.Drawing.Point(737, 20);
+            this.labelMemory.Name = "labelMemory";
+            this.labelMemory.Size = new System.Drawing.Size(159, 13);
+            this.labelMemory.TabIndex = 7;
+            this.labelMemory.Text = "Memóriahasználat:             0 MB";
             // 
             // checkBoxIgnoreRunningState
             // 
@@ -184,80 +197,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.checkBoxShowLineNumbers.Text = "Sorszám megjelenítése";
             this.checkBoxShowLineNumbers.UseVisualStyleBackColor = true;
             // 
-            // multiGetIDs
-            // 
-            this.multiGetIDs.Location = new System.Drawing.Point(282, 141);
-            this.multiGetIDs.Minimum = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-            this.multiGetIDs.Name = "multiGetIDs";
-            this.multiGetIDs.Size = new System.Drawing.Size(120, 20);
-            this.multiGetIDs.TabIndex = 5;
-            this.multiGetIDs.Value = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            // 
-            // labelMultiStatus
-            // 
-            this.labelMultiStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelMultiStatus.AutoSize = true;
-            this.labelMultiStatus.Location = new System.Drawing.Point(807, 146);
-            this.labelMultiStatus.Name = "labelMultiStatus";
-            this.labelMultiStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.labelMultiStatus.Size = new System.Drawing.Size(87, 13);
-            this.labelMultiStatus.TabIndex = 6;
-            this.labelMultiStatus.Text = "Állapot: 0 szál fut";
-            // 
-            // buttonMultiStop
-            // 
-            this.buttonMultiStop.Location = new System.Drawing.Point(95, 141);
-            this.buttonMultiStop.Name = "buttonMultiStop";
-            this.buttonMultiStop.Size = new System.Drawing.Size(75, 23);
-            this.buttonMultiStop.TabIndex = 4;
-            this.buttonMultiStop.Text = "MutiStop";
-            this.buttonMultiStop.UseVisualStyleBackColor = true;
-            this.buttonMultiStop.Click += new System.EventHandler(this.buttonMultiStop_Click);
-            // 
-            // buttonMultiGo
-            // 
-            this.buttonMultiGo.Location = new System.Drawing.Point(14, 141);
-            this.buttonMultiGo.Name = "buttonMultiGo";
-            this.buttonMultiGo.Size = new System.Drawing.Size(75, 23);
-            this.buttonMultiGo.TabIndex = 3;
-            this.buttonMultiGo.Text = "MultiGo";
-            this.buttonMultiGo.UseVisualStyleBackColor = true;
-            this.buttonMultiGo.Click += new System.EventHandler(this.buttonMultiGo_Click);
-            // 
             // _statusTimer
             // 
             this._statusTimer.Enabled = true;
             this._statusTimer.Tick += new System.EventHandler(this._statusTimer_Tick);
-            // 
-            // labelMemory
-            // 
-            this.labelMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelMemory.AutoSize = true;
-            this.labelMemory.Location = new System.Drawing.Point(737, 20);
-            this.labelMemory.Name = "labelMemory";
-            this.labelMemory.Size = new System.Drawing.Size(159, 13);
-            this.labelMemory.TabIndex = 7;
-            this.labelMemory.Text = "Memóriahasználat:             0 MB";
-            // 
-            // labelTextboxMemory
-            // 
-            this.labelTextboxMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelTextboxMemory.AutoSize = true;
-            this.labelTextboxMemory.Location = new System.Drawing.Point(737, 43);
-            this.labelTextboxMemory.Name = "labelTextboxMemory";
-            this.labelTextboxMemory.Size = new System.Drawing.Size(157, 13);
-            this.labelTextboxMemory.TabIndex = 8;
-            this.labelTextboxMemory.Text = "TextBox tartalom:               0 KB";
             // 
             // FormMain
             // 
@@ -275,7 +218,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.grpSingleOperations.PerformLayout();
             this.grpMultiOperations.ResumeLayout(false);
             this.grpMultiOperations.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.multiGetIDs)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -292,10 +234,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.GroupBox grpSingleOperations;
         private System.Windows.Forms.GroupBox grpMultiOperations;
-        private System.Windows.Forms.Label labelMultiStatus;
-        private System.Windows.Forms.Button buttonMultiStop;
-        private System.Windows.Forms.Button buttonMultiGo;
-        private System.Windows.Forms.NumericUpDown multiGetIDs;
         private System.Windows.Forms.CheckBox checkBoxIgnoreRunningState;
         private System.Windows.Forms.CheckBox checkBoxShowTimestamps;
         private System.Windows.Forms.CheckBox checkBoxShowLineNumbers;

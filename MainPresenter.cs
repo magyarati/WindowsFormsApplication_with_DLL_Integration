@@ -16,7 +16,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private readonly BatchingLogger _logger;
 
         private readonly GetIDWorker _singleWorker;
-        private readonly List<GetIDWorker> _multiWorkers = new List<GetIDWorker>();
 
         private readonly Timer _memoryTimer;
 
@@ -35,8 +34,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
             _view.GoRequested += (sender, e) => OnGo();
             _view.StopRequested += (sender, e) => OnStop();
             _view.SaveRequested += (sender, e) => OnSave();
-            _view.MultiGoRequested += (sender, e) => OnMultiGo();
-            _view.MultiStopRequested += (sender, e) => OnMultiStop();
 
             _memoryTimer = new Timer { Interval = 3000 };
             _memoryTimer.Tick += (s, e) =>
@@ -138,81 +135,18 @@ namespace WindowsFormsApplication_with_DLL_Integration
             }
         }
 
-        private void OnMultiGo()
-        {
-            try
-            {
-                Parallel.ForEach(_multiWorkers, w => w.Dispose());
-                _multiWorkers.Clear();
-
-                int darab = _view.MultiGetIDsValue;
-                if (darab < 1)
-                {
-                    _logger.AppendLine(">> MultiGo: érvénytelen darabszám.");
-                    return;
-                }
-
-                for (int i = 0; i < darab; i++)
-                {
-                    var worker = new GetIDWorker();
-                    int idx = i + 1;
-                    worker.ValueReceived += (s, v) => LoggerLog(v, idx);
-                    worker.ErrorReceived += (s, err) => LoggerError(err, idx);
-                    _multiWorkers.Add(worker);
-                }
-
-                Parallel.For(0, _multiWorkers.Count, i =>
-                {
-                    _multiWorkers[i].Start();
-                    _logger.AppendLine($">> Multi GO eljárás indítva: példány #{i + 1}");
-                });
-
-                _logger.AppendLine($">> Összesen {_multiWorkers.Count} példány fut.");
-            }
-            catch (Exception ex)
-            {
-                _logger.AppendLine("[HIBA] MultiGo: " + ex.Message);
-            }
-        }
-
-        private void OnMultiStop()
-        {
-            try
-            {
-                if (_multiWorkers.Count == 0)
-                {
-                    _logger.AppendLine(">> Nincsenek futó Multi-példányok.");
-                    return;
-                }
-
-                Parallel.ForEach(_multiWorkers, w => w.Dispose());
-                _logger.AppendLine($">> Leállítva {_multiWorkers.Count} multi-példány.");
-                _multiWorkers.Clear();
-            }
-            catch (Exception ex)
-            {
-                _logger.AppendLine("[HIBA] MultiStop: " + ex.Message);
-            }
-        }
-
         private void UpdateRunningState()
         {
             string singleText = _singleWorker.Running
                 ? "Állapot: Futtatás alatt"
                 : "Állapot: Leállítva";
 
-            int multiRunning = _multiWorkers.Count(w => w.Running);
-            string multiText = $"Állapot: {multiRunning} szál fut";
-
             _view.UpdateSingleStatus(singleText);
-            _view.UpdateMultiStatus(multiText);
         }
 
         internal void OnClosing()
         {
             _singleWorker.Dispose();
-            foreach (var w in _multiWorkers)
-                w.Dispose();
             _logger.Dispose();
             _memoryTimer.Stop();
             _memoryTimer.Dispose();
