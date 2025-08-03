@@ -20,5 +20,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         void DisplayLog(string text);
         void UpdateSingleStatus(string status);
         void UpdateMultiStatus(string status);
+        void UpdateMemoryStatus(string formatted);
+        void UpdateTextboxMemoryStatus(string formatted);
     }
 }

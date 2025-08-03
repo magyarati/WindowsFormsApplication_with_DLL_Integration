@@ -89,6 +89,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
         public void DisplayLog(string text) => logger.AppendLine(text);
         public void UpdateSingleStatus(string s) => SetLabelTextSafe(labelStatus, s);
         public void UpdateMultiStatus(string s) => SetLabelTextSafe(labelMultiStatus, s);
+        public void UpdateMemoryStatus(string s) => SetLabelTextSafe(labelMemory, s);
+        public void UpdateTextboxMemoryStatus(string s) => SetLabelTextSafe(labelTextboxMemory, s);
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {

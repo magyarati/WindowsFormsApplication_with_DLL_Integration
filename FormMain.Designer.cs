@@ -47,6 +47,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonMultiStop = new System.Windows.Forms.Button();
             this.buttonMultiGo = new System.Windows.Forms.Button();
             this._statusTimer = new System.Windows.Forms.Timer(this.components);
+            this.labelMemory = new System.Windows.Forms.Label();
+            this.labelTextboxMemory = new System.Windows.Forms.Label();
             this.grpSingleOperations.SuspendLayout();
             this.grpMultiOperations.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.multiGetIDs)).BeginInit();
@@ -107,7 +109,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this.labelStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(820, 21);
+            this.labelStatus.Location = new System.Drawing.Point(807, 21);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.labelStatus.Size = new System.Drawing.Size(86, 13);
@@ -133,6 +135,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this.grpMultiOperations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpMultiOperations.Controls.Add(this.labelTextboxMemory);
+            this.grpMultiOperations.Controls.Add(this.labelMemory);
             this.grpMultiOperations.Controls.Add(this.checkBoxIgnoreRunningState);
             this.grpMultiOperations.Controls.Add(this.checkBoxShowTimestamps);
             this.grpMultiOperations.Controls.Add(this.checkBoxShowLineNumbers);
@@ -201,7 +205,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this.labelMultiStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelMultiStatus.AutoSize = true;
-            this.labelMultiStatus.Location = new System.Drawing.Point(820, 146);
+            this.labelMultiStatus.Location = new System.Drawing.Point(807, 146);
             this.labelMultiStatus.Name = "labelMultiStatus";
             this.labelMultiStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.labelMultiStatus.Size = new System.Drawing.Size(87, 13);
@@ -232,6 +236,28 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this._statusTimer.Enabled = true;
             this._statusTimer.Tick += new System.EventHandler(this._statusTimer_Tick);
+            // 
+            // labelMemory
+            // 
+            this.labelMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelMemory.AutoSize = true;
+            this.labelMemory.Location = new System.Drawing.Point(737, 20);
+            this.labelMemory.Name = "labelMemory";
+            this.labelMemory.Size = new System.Drawing.Size(159, 13);
+            this.labelMemory.TabIndex = 7;
+            this.labelMemory.Text = "Memóriahasználat:             0 MB";
+            // 
+            // labelTextboxMemory
+            // 
+            this.labelTextboxMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTextboxMemory.AutoSize = true;
+            this.labelTextboxMemory.Location = new System.Drawing.Point(737, 43);
+            this.labelTextboxMemory.Name = "labelTextboxMemory";
+            this.labelTextboxMemory.Size = new System.Drawing.Size(157, 13);
+            this.labelTextboxMemory.TabIndex = 8;
+            this.labelTextboxMemory.Text = "TextBox tartalom:               0 KB";
             // 
             // FormMain
             // 
@@ -274,6 +300,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.CheckBox checkBoxShowTimestamps;
         private System.Windows.Forms.CheckBox checkBoxShowLineNumbers;
         private System.Windows.Forms.Timer _statusTimer;
+        private System.Windows.Forms.Label labelMemory;
+        private System.Windows.Forms.Label labelTextboxMemory;
     }
 }
 

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GetID</name>
+    </assembly>
+    <members>
+        <member name="P:GetID.GetID.Running">
+            <summary>
+            Ez a tulajdonság jelzi, elindult-e az értékek generálása
+            </summary>
+        </member>
+        <member name="P:GetID.GetID.Value">
+            <summary>
+            Ebben a tulajdonságban jelenik meg a generált érték.
+            </summary>
+        </member>
+        <member name="P:GetID.GetID.ErrorMessage">
+            <summary>
+            Ez a tulajdonság hibaüzenetet tartalmaz, ha valami gond van a DLL eljárásainak futása során
+            </summary>
+        </member>
+        <member name="M:GetID.GetID.Go">
+            <summary>
+            Ez a tulajdonság indítja az értékek generálását, 0.5-2.5 másodpercenként keletkezik egy új
+            </summary>
+        </member>
+        <member name="M:GetID.GetID.Stop">
+            <summary>
+            Ez a tulajdonság állítja le az értékek generálását
+            </summary>
+        </member>
+        <member name="E:GetID.GetID.ValueChanged">
+            <summary>
+            Ez az esemény jelzi, hogy van új érték
+            </summary>
+        </member>
+        <member name="E:GetID.GetID.ErrorChanged">
+            <summary>
+            Ez az esemény jelzi, hogy valami hiba van
+            </summary>
+        </member>
+    </members>
+</doc>

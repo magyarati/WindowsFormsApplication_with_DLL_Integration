@@ -13,13 +13,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
     public class BatchingLogger : IDisposable
     {
         private readonly ConcurrentQueue<string> queue = new ConcurrentQueue<string>();
-        private readonly StringBuilder buffer = new StringBuilder();
         private readonly TextBox textBox;
         private readonly System.Windows.Forms.Timer flushTimer;
         private readonly ISaveHandler saveHandler;
         private readonly int maxChars;
         private int currentChars = 0;
-        private readonly object bufferLock = new object();
 
         private readonly string silentFileBaseName;
         private readonly string silentFileDirectory;
@@ -28,7 +26,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private readonly CheckBox checkBoxShowTimestamps;
         private readonly CheckBox checkBoxShowLineNumbers;
         private int lineCounter = 1;
-
 
         public BatchingLogger(
             TextBox textBox,
@@ -64,7 +61,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
             if (checkBoxShowLineNumbers?.Checked == true)
             {
-                linePrefix += $"{currentLine,5}: ";
+                linePrefix += $"{currentLine,8}: ";
             }
 
             if (checkBoxShowTimestamps?.Checked == true)
@@ -76,7 +73,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
             queue.Enqueue(line);
         }
 
-
         private void Flush()
         {
             if (queue.IsEmpty)
@@ -87,17 +83,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 sb.Append(line);
 
             string batch = sb.ToString();
-
-            lock (bufferLock)
-            {
-                buffer.Append(batch);
-                TrimBufferAndSaveOverflow();
-            }
-
-            AppendToTextBox(batch);
+            AppendToTextBoxWithTrimming(batch);
         }
 
-        private void AppendToTextBox(string batch)
+        private void AppendToTextBoxWithTrimming(string batch)
         {
             textBox.AppendText(batch);
             currentChars += batch.Length;
@@ -106,36 +95,20 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 return;
 
             int threshold = maxChars / 2;
-            int cutIndex = textBox.Text.IndexOf('\n', threshold);
+            string existingText = textBox.Text;
+            int cutIndex = existingText.IndexOf('\n', threshold);
             if (cutIndex < 0)
                 cutIndex = threshold;
             else
                 cutIndex += 1;
 
-            textBox.Select(0, cutIndex);
-            textBox.SelectedText = string.Empty;
+            string removedText = existingText.Substring(0, cutIndex);
+            textBox.Text = existingText.Substring(cutIndex);
             currentChars = textBox.Text.Length;
-        }
-
-        private void TrimBufferAndSaveOverflow()
-        {
-            if (buffer.Length <= maxChars)
-                return;
-
-            int threshold = maxChars / 2;
-            string all = buffer.ToString();
-            int cutIndex = all.IndexOf('\n', threshold);
-            if (cutIndex < 0)
-                cutIndex = threshold;
-            else
-                cutIndex += 1;
-
-            string removedPart = all.Substring(0, cutIndex);
-            buffer.Remove(0, cutIndex);
 
             string path = GetNextSilentFilePath();
             _ = saveHandler.SaveLogAsync(
-                getContent: () => removedPart,
+                getContent: () => removedText,
                 log: _ => { },
                 silent: true,
                 silentFilePath: path
@@ -151,11 +124,10 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         public string GetContent()
         {
-            lock (bufferLock)
-            {
-                return buffer.ToString();
-            }
+           return textBox.Text.ToString();
         }
+
+        public int GetCurrentTextSize() => textBox.Text.Length;
 
         public void Dispose()
         {
