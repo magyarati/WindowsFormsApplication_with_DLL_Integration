@@ -16,7 +16,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private readonly TextBox textBox;
         private readonly System.Windows.Forms.Timer flushTimer;
         private readonly ISaveHandler saveHandler;
-        private readonly int maxChars;
+        private int maxChars;
         private int currentChars = 0;
 
         private readonly string silentFileBaseName;
@@ -128,6 +128,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
         }
 
         public int GetCurrentTextSize() => textBox.Text.Length;
+
+        public void SetMaxChars(int newMax)
+        {
+            maxChars = newMax;
+        }
 
         public void Dispose()
         {

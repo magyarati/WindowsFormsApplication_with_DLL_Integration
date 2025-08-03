@@ -42,7 +42,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             checkBoxShowTimestamps,
             checkBoxShowLineNumbers,
             flushIntervalMs: 100,
-            maxChars: 20_000_000);
+            maxChars: 32 * 1024 * 1024);
 
             _presenter = new MainPresenter(this, saveHandler, logger);
         }
@@ -70,7 +70,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
             SaveRequested?.Invoke(this, EventArgs.Empty);
         }
 
-
         public void DisplayLog(string text) => logger.AppendLine(text);
         public void UpdateSingleStatus(string s) => SetLabelTextSafe(labelStatus, s);
         public void UpdateMemoryStatus(string s) => SetLabelTextSafe(labelMemory, s);
@@ -85,6 +84,13 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private void _statusTimer_Tick(object sender, EventArgs e)
         {
             _presenter.RefreshStatus();
+        }
+
+        private void numericUpDownTextBoxLength_ValueChanged(object sender, EventArgs e)
+        {
+            int newMaxChars = (int)numericUpDownTextBoxLength.Value * 1024 * 1024;
+            logger.SetMaxChars(newMaxChars);
+            textBoxOutput.MaxLength = newMaxChars;
         }
     }
 }

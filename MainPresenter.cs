@@ -50,7 +50,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             Process currentProcess = Process.GetCurrentProcess();
             long bytes = currentProcess.PrivateMemorySize64;
-            string formatted = string.Format("Memóriahasználat: {0,12:F0} MB", bytes / 1024f / 1024f);
+            string formatted = string.Format("Alkalmazás memóriahasználata: {0,12:F0} MB", bytes / 1024f / 1024f);
             _view.UpdateMemoryStatus(formatted);
         }
 
@@ -58,7 +58,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             int chars = _logger.GetCurrentTextSize();
             double kb = chars * sizeof(char) / 1024.0;
-            string formatted = string.Format("TextBox tartalom: {0,14:F0} KB", kb);
+            string formatted = string.Format("TextBox memóriahasználata: {0,18:F0} KB", kb);
             _view.UpdateTextboxMemoryStatus(formatted);
         }
 

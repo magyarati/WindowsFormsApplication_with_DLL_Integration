@@ -45,8 +45,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.checkBoxShowTimestamps = new System.Windows.Forms.CheckBox();
             this.checkBoxShowLineNumbers = new System.Windows.Forms.CheckBox();
             this._statusTimer = new System.Windows.Forms.Timer(this.components);
+            this.numericUpDownTextBoxLength = new System.Windows.Forms.NumericUpDown();
+            this.labelTextBoxSize = new System.Windows.Forms.Label();
             this.grpSingleOperations.SuspendLayout();
             this.grpMultiOperations.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTextBoxLength)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxOutput
@@ -54,6 +57,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.textBoxOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxOutput.Location = new System.Drawing.Point(12, 45);
+            this.textBoxOutput.MaxLength = 33554432;
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -130,6 +134,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this.grpMultiOperations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpMultiOperations.Controls.Add(this.labelTextBoxSize);
+            this.grpMultiOperations.Controls.Add(this.numericUpDownTextBoxLength);
             this.grpMultiOperations.Controls.Add(this.labelTextboxMemory);
             this.grpMultiOperations.Controls.Add(this.labelMemory);
             this.grpMultiOperations.Controls.Add(this.checkBoxIgnoreRunningState);
@@ -147,22 +153,22 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.labelTextboxMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTextboxMemory.AutoSize = true;
-            this.labelTextboxMemory.Location = new System.Drawing.Point(737, 43);
+            this.labelTextboxMemory.Location = new System.Drawing.Point(683, 43);
             this.labelTextboxMemory.Name = "labelTextboxMemory";
-            this.labelTextboxMemory.Size = new System.Drawing.Size(157, 13);
+            this.labelTextboxMemory.Size = new System.Drawing.Size(219, 13);
             this.labelTextboxMemory.TabIndex = 8;
-            this.labelTextboxMemory.Text = "TextBox tartalom:               0 KB";
+            this.labelTextboxMemory.Text = "TextBox memóriahasználata:                  0 KB";
             // 
             // labelMemory
             // 
             this.labelMemory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.labelMemory.AutoSize = true;
-            this.labelMemory.Location = new System.Drawing.Point(737, 20);
+            this.labelMemory.Location = new System.Drawing.Point(683, 20);
             this.labelMemory.Name = "labelMemory";
-            this.labelMemory.Size = new System.Drawing.Size(159, 13);
+            this.labelMemory.Size = new System.Drawing.Size(220, 13);
             this.labelMemory.TabIndex = 7;
-            this.labelMemory.Text = "Memóriahasználat:             0 MB";
+            this.labelMemory.Text = "Alkalmazás memóriahasználata:             0 MB";
             // 
             // checkBoxIgnoreRunningState
             // 
@@ -202,6 +208,43 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this._statusTimer.Enabled = true;
             this._statusTimer.Tick += new System.EventHandler(this._statusTimer_Tick);
             // 
+            // numericUpDownTextBoxLength
+            // 
+            this.numericUpDownTextBoxLength.Increment = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Location = new System.Drawing.Point(126, 111);
+            this.numericUpDownTextBoxLength.Maximum = new decimal(new int[] {
+            256,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Minimum = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Name = "numericUpDownTextBoxLength";
+            this.numericUpDownTextBoxLength.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownTextBoxLength.TabIndex = 9;
+            this.numericUpDownTextBoxLength.Value = new decimal(new int[] {
+            32,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.ValueChanged += new System.EventHandler(this.numericUpDownTextBoxLength_ValueChanged);
+            // 
+            // labelTextBoxSize
+            // 
+            this.labelTextBoxSize.AutoSize = true;
+            this.labelTextBoxSize.Location = new System.Drawing.Point(11, 113);
+            this.labelTextBoxSize.Name = "labelTextBoxSize";
+            this.labelTextBoxSize.Size = new System.Drawing.Size(109, 13);
+            this.labelTextBoxSize.TabIndex = 10;
+            this.labelTextBoxSize.Text = "TextBox mérete (MB):";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -218,6 +261,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.grpSingleOperations.PerformLayout();
             this.grpMultiOperations.ResumeLayout(false);
             this.grpMultiOperations.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTextBoxLength)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -240,6 +284,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.Timer _statusTimer;
         private System.Windows.Forms.Label labelMemory;
         private System.Windows.Forms.Label labelTextboxMemory;
+        private System.Windows.Forms.Label labelTextBoxSize;
+        private System.Windows.Forms.NumericUpDown numericUpDownTextBoxLength;
     }
 }
 
