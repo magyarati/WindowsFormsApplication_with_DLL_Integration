@@ -82,7 +82,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonGo.TabIndex = 0;
             this.buttonGo.Text = "Go";
             this.buttonGo.UseVisualStyleBackColor = true;
-            this.buttonGo.Click += new System.EventHandler(this.ButtonGo_Click);
+            this.buttonGo.Click += new System.EventHandler(this.buttonGo_Click);
             // 
             // buttonStop
             // 
@@ -92,7 +92,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonStop.TabIndex = 1;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
-            this.buttonStop.Click += new System.EventHandler(this.ButtonStop_Click);
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
             // buttonSave
             // 
@@ -102,7 +102,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonSave.TabIndex = 2;
             this.buttonSave.Text = "Mentés";
             this.buttonSave.UseVisualStyleBackColor = true;
-            this.buttonSave.Click += new System.EventHandler(this.ButtonSave_Click);
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
             // labelStatus
             // 
@@ -206,7 +206,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // _statusTimer
             // 
             this._statusTimer.Enabled = true;
-            this._statusTimer.Tick += new System.EventHandler(this.StatusTimer_Tick);
+            this._statusTimer.Tick += new System.EventHandler(this._statusTimer_Tick);
             // 
             // numericUpDownTextBoxLength
             // 
@@ -234,7 +234,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             0,
             0,
             0});
-            this.numericUpDownTextBoxLength.ValueChanged += new System.EventHandler(this.NumericUpDownTextBoxLength_ValueChanged);
+            this.numericUpDownTextBoxLength.ValueChanged += new System.EventHandler(this.numericUpDownTextBoxLength_ValueChanged);
             // 
             // labelTextBoxSize
             // 

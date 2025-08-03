@@ -13,6 +13,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         /// The main entry point for the application.
         /// </summary>
 
+        // Define the ServiceProvider as static if needed globally
         public static IServiceProvider ServiceProvider { get; private set; }
 
         [STAThread]
@@ -20,19 +21,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-
-            ServiceProvider = services.BuildServiceProvider();
-
-            var mainPresenter = ServiceProvider.GetRequiredService<IMainPresenter>();
-
-            var view = mainPresenter.Initialize();
-            view.Initialize();
-
-            Application.Run(view);
-
+            
             Application.ThreadException += (sender, args) =>
             {
                 MessageBox.Show("Nem kezelt hiba: " + args.Exception.Message, "Kritikus hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -42,15 +31,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             {
                 MessageBox.Show("Végzetes hiba: " + ((Exception)args.ExceptionObject).Message, "Végzetes hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
-        }
 
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddSingleton<ILogger, BatchingLogger>();
-            services.AddTransient<ISaveHandler, SaveHandler>();
-            services.AddTransient<IMainPresenter, MainPresenter>();
-            services.AddTransient<IMainView, FormMain>();
-            services.AddTransient<FormMain>();
+            Application.Run(new FormMain());
         }
     }
 }

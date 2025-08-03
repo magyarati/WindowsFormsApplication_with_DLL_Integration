@@ -12,175 +12,85 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication_with_DLL_Integration
 {
-    public partial class FormMain : Form
+    public partial class FormMain : Form, IMainView
     {
-        private readonly GetID.GetID getID;
-        private readonly StringBuilder logBuffer = new StringBuilder();
-        private readonly object logLock = new object();
-        private readonly Logger logger;
+        private MainPresenter _presenter;
+        private ISaveHandler saveHandler;
+        private BatchingLogger logger;
+
+        public event EventHandler GoRequested;
+        public event EventHandler StopRequested;
+        public event EventHandler SaveRequested;
+
+        public bool IgnoreRunningState => checkBoxIgnoreRunningState.Checked;
 
         public FormMain()
         {
             InitializeComponent();
 
-            logger = new Logger(textBoxOutput);
-
-            getID = new GetID.GetID();
-            getID.ValueChanged += getID_ValueChanged;
-            getID.ErrorChanged += getID_ErrorChanged;
-
             toolTip.SetToolTip(buttonGo, "Elindítja a GO eljárást, ha az még nem fut.");
             toolTip.SetToolTip(buttonStop, "Leállítja a GO eljárást, ha éppen fut.");
             toolTip.SetToolTip(buttonSave, "Menti fájlba a TextBox tartalmát.");
+        }
 
-            UpdateRunningState();
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            saveHandler = new SaveHandler();
+            logger = new BatchingLogger(
+            textBoxOutput,
+            saveHandler,
+            checkBoxShowTimestamps,
+            checkBoxShowLineNumbers,
+            flushIntervalMs: 100,
+            maxChars: 32 * 1024 * 1024);
+
+            _presenter = new MainPresenter(this, saveHandler, logger);
+        }
+
+        private void SetLabelTextSafe(Label lbl, string text)
+        {
+            if (lbl.InvokeRequired)
+                lbl.Invoke(new Action(() => lbl.Text = text));
+            else
+                lbl.Text = text;
         }
 
         private void buttonGo_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (!getID.Running)
-                {
-                    getID.Go();
-                    logger.AppendLine(">> GO eljárás elindítva");
-                    UpdateRunningState();
-                }
-                else
-                {
-                    logger.AppendLine(">> Már fut a GO eljárás, újraindítás nem történt.");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.AppendLine("[HIBA] Start: " + ex.Message);
-            }
+            GoRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (getID.Running)
-                {
-                    getID.Stop();
-                    logger.AppendLine(">> STOP eljárás elindítva");
-                    UpdateRunningState();
-                }
-                else
-                {
-                    logger.AppendLine(">> A GO eljárás nem fut.");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.AppendLine("[HIBA] Stop: " + ex.Message);
-            }
+            StopRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private async void buttonSave_Click(object sender, EventArgs e)
+        private void buttonSave_Click(object sender, EventArgs e)
         {
-            while (true)
-            {
-                using (SaveFileDialog sfd = new SaveFileDialog())
-                {
-                    sfd.Filter = "Text fájl (*.txt)|*.txt";
-                    sfd.Title = "Mentés fájlba";
-                    sfd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    sfd.FileName = $"log_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-
-                    if (sfd.ShowDialog() == DialogResult.OK)
-                    {
-                        try
-                        {
-                            string content;
-                            lock (logLock)
-                            {
-                                content = logger.GetContent();
-                            }
-
-                            await Task.Run(() =>
-                            {
-                                using (FileStream fs = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                                using (StreamWriter writer = new StreamWriter(fs))
-                                {
-                                    writer.Write(content);
-                                }
-                            });
-
-                            logger.AppendLine($">> Log sikeresen elmentve: {sfd.FileName}");
-                            break;
-                        }
-                        catch (IOException ioex)
-                        {
-                            logger.AppendLine($"[HIBA] Mentés sikertelen, fájl használatban lehet: {ioex.Message}");
-                            DialogResult retry = MessageBox.Show(
-                                $"Nem sikerült menteni, a fájl lehet, hogy használatban van:\n\n{ioex.Message}\n\nPróbálsz másik fájlt?",
-                                "Hiba mentéskor",
-                                MessageBoxButtons.RetryCancel,
-                                MessageBoxIcon.Warning);
-
-                            if (retry == DialogResult.Cancel)
-                            {
-                                logger.AppendLine(">> Felhasználó megszakította a mentést.");
-                                break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.AppendLine($"[HIBA] Ismeretlen mentési hiba: {ex.Message}");
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        logger.AppendLine(">> Mentés megszakítva, nem lett fájl kiválasztva.");
-                        break;
-                    }
-                }
-            }
+            SaveRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void getID_ValueChanged(object sender, EventArgs e)
+        public void DisplayLog(string text) => logger.AppendLine(text);
+        public void UpdateSingleStatus(string s) => SetLabelTextSafe(labelStatus, s);
+        public void UpdateMemoryStatus(string s) => SetLabelTextSafe(labelMemory, s);
+        public void UpdateTextboxMemoryStatus(string s) => SetLabelTextSafe(labelTextboxMemory, s);
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            try
-            {
-                string value = getID.Value ?? "";
-                string result = IsValid(value)
-                    ? value + " – MEGFELELŐ"
-                    : value + " – NEM MEGFELELŐ";
-                logger.AppendLine(result);
-            }
-            catch (Exception ex)
-            {
-                logger.AppendLine("[HIBA] ValueChanged: " + ex.Message);
-            }
+            base.OnFormClosing(e);
+            _presenter.OnClosing();
         }
 
-        private void getID_ErrorChanged(object sender, EventArgs e)
+        private void _statusTimer_Tick(object sender, EventArgs e)
         {
-            string error = getID.ErrorMessage ?? "";
-            logger.AppendLine("[HIBA]: " + error);
+            _presenter.RefreshStatus();
         }
 
-        private bool IsValid(string value)
+        private void numericUpDownTextBoxLength_ValueChanged(object sender, EventArgs e)
         {
-            return Regex.IsMatch(value, @"^[A-Z]\d{4}$");
-        }
-
-        private void UpdateRunningState()
-        {
-            bool isRunning = getID.Running;
-            string status = isRunning ? "Állapot: Futtatás alatt" : "Állapot: Leállítva";
-
-            if (labelStatus.InvokeRequired)
-            {
-                labelStatus.Invoke(new Action(() => labelStatus.Text = status));
-            }
-            else
-            {
-                labelStatus.Text = status;
-            }
+            int newMaxChars = (int)numericUpDownTextBoxLength.Value * 1024 * 1024;
+            logger.SetMaxChars(newMaxChars);
+            textBoxOutput.MaxLength = newMaxChars;
         }
     }
 }

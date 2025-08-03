@@ -9,7 +9,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
     public interface ISaveHandler
     {
         Task SaveLogAsync(
-            string content,
+            Func<string> getContent,
             Action<string> log,
             bool silent = false,
             string silentFilePath = null);

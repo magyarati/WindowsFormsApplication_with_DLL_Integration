@@ -1,30 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApplication_with_DLL_Integration
 {
     public partial class FormMain : Form, IMainView
     {
-        private MainPresenter _presenter;
-        private ISaveHandler saveHandler;
-        private BatchingLogger logger;
+        public FormMain( ILogger logger)
+        {
+            this.logger = logger;
+        }
+
+        private ILogger logger;
 
         public event EventHandler GoRequested;
         public event EventHandler StopRequested;
         public event EventHandler SaveRequested;
+        public event EventHandler ViewClosed;
+        public event EventHandler RefreshStatus;
 
         public bool IgnoreRunningState => checkBoxIgnoreRunningState.Checked;
 
-        public FormMain()
+        public void Initialize()
         {
             InitializeComponent();
 
@@ -35,16 +31,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            saveHandler = new SaveHandler();
-            logger = new BatchingLogger(
-            textBoxOutput,
-            saveHandler,
+            logger.InitializeLogger(textBoxOutput,
             checkBoxShowTimestamps,
             checkBoxShowLineNumbers,
             flushIntervalMs: 100,
             maxChars: 32 * 1024 * 1024);
-
-            _presenter = new MainPresenter(this, saveHandler, logger);
         }
 
         private void SetLabelTextSafe(Label lbl, string text)
@@ -55,17 +46,17 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 lbl.Text = text;
         }
 
-        private void buttonGo_Click(object sender, EventArgs e)
+        private void ButtonGo_Click(object sender, EventArgs e)
         {
             GoRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void buttonStop_Click(object sender, EventArgs e)
+        private void ButtonStop_Click(object sender, EventArgs e)
         {
             StopRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void buttonSave_Click(object sender, EventArgs e)
+        private void ButtonSave_Click(object sender, EventArgs e)
         {
             SaveRequested?.Invoke(this, EventArgs.Empty);
         }
@@ -78,19 +69,24 @@ namespace WindowsFormsApplication_with_DLL_Integration
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            _presenter.OnClosing();
+            ViewClosed.Invoke(this, EventArgs.Empty);
         }
 
-        private void _statusTimer_Tick(object sender, EventArgs e)
+        private void StatusTimer_Tick(object sender, EventArgs e)
         {
-            _presenter.RefreshStatus();
+            RefreshStatus.Invoke(this, EventArgs.Empty);
         }
 
-        private void numericUpDownTextBoxLength_ValueChanged(object sender, EventArgs e)
+        private void NumericUpDownTextBoxLength_ValueChanged(object sender, EventArgs e)
         {
             int newMaxChars = (int)numericUpDownTextBoxLength.Value * 1024 * 1024;
             logger.SetMaxChars(newMaxChars);
             textBoxOutput.MaxLength = newMaxChars;
+        }
+
+        public string GetContent()
+        {
+            return textBoxOutput.Text;
         }
     }
 }

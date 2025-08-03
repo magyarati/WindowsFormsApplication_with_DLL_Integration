@@ -10,9 +10,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
 {
     class SaveHandler : ISaveHandler
     {
-
         public async Task SaveLogAsync(
-            string content,
+            Func<string> getContent,
             Action<string> log,
             bool silent = false,
             string silentFilePath = null)
@@ -50,6 +49,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 }
 
                 log($">> Log mentése elkezdődött: {targetPath}");
+                var content = getContent();
                 var data = Encoding.UTF8.GetBytes(content);
 
                 try

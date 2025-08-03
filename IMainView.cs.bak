@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace WindowsFormsApplication_with_DLL_Integration
 {
-    public interface IMainView
+    interface IMainView
     {
         event EventHandler GoRequested;
         event EventHandler StopRequested;
         event EventHandler SaveRequested;
-        event EventHandler ViewClosed;
-        event EventHandler RefreshStatus;
 
         bool IgnoreRunningState { get; }
 
-        string GetContent();
         void DisplayLog(string text);
         void UpdateSingleStatus(string status);
         void UpdateMemoryStatus(string formatted);
