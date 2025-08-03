@@ -33,10 +33,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             _view.SaveRequested += (sender, e) => OnSave();
             _view.MultiGoRequested += (sender, e) => OnMultiGo();
             _view.MultiStopRequested += (sender, e) => OnMultiStop();
-
-            UpdateRunningState();
         }
-
+        public void RefreshStatus() => UpdateRunningState();
         private bool IsValid(string value) =>
             Regex.IsMatch(value, @"^[A-Z]\d{4}$");
 
@@ -63,7 +61,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 {
                     _singleWorker.Start();
                     _logger.AppendLine(">> GO eljárás elindítva");
-                    UpdateRunningState();
                 }
                 else
                 {
@@ -84,7 +81,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 {
                     _singleWorker.Stop();
                     _logger.AppendLine(">> STOP eljárás elindítva");
-                    UpdateRunningState();
                 }
                 else
                 {
@@ -142,7 +138,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 });
 
                 _logger.AppendLine($">> Összesen {_multiWorkers.Count} példány fut.");
-                UpdateRunningState();
             }
             catch (Exception ex)
             {
@@ -163,7 +158,6 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 Parallel.ForEach(_multiWorkers, w => w.Dispose());
                 _logger.AppendLine($">> Leállítva {_multiWorkers.Count} multi-példány.");
                 _multiWorkers.Clear();
-                UpdateRunningState();
             }
             catch (Exception ex)
             {

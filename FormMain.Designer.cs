@@ -46,6 +46,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.labelMultiStatus = new System.Windows.Forms.Label();
             this.buttonMultiStop = new System.Windows.Forms.Button();
             this.buttonMultiGo = new System.Windows.Forms.Button();
+            this._statusTimer = new System.Windows.Forms.Timer(this.components);
             this.grpSingleOperations.SuspendLayout();
             this.grpMultiOperations.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.multiGetIDs)).BeginInit();
@@ -227,6 +228,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.buttonMultiGo.UseVisualStyleBackColor = true;
             this.buttonMultiGo.Click += new System.EventHandler(this.buttonMultiGo_Click);
             // 
+            // _statusTimer
+            // 
+            this._statusTimer.Enabled = true;
+            this._statusTimer.Tick += new System.EventHandler(this._statusTimer_Tick);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -237,7 +243,8 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.Controls.Add(this.labelTextBoxOutput);
             this.Controls.Add(this.textBoxOutput);
             this.Name = "FormMain";
-            this.Text = "Windows Forms Application projekt DLL fájl referenciával";
+            this.Text = "DLL integrációs WinForms alkalmazás";
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.grpSingleOperations.ResumeLayout(false);
             this.grpSingleOperations.PerformLayout();
             this.grpMultiOperations.ResumeLayout(false);
@@ -266,6 +273,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.CheckBox checkBoxIgnoreRunningState;
         private System.Windows.Forms.CheckBox checkBoxShowTimestamps;
         private System.Windows.Forms.CheckBox checkBoxShowLineNumbers;
+        private System.Windows.Forms.Timer _statusTimer;
     }
 }
 
