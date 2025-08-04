@@ -3,15 +3,14 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApplication_with_DLL_Integration
 {
-    public partial class FormMain : Form, IMainView
+    public partial class FormMain : Form, IMainView, ILogView
     {
         public FormMain( ILogger logger)
         {
             this.logger = logger;
         }
 
-        private ILogger logger;
-
+ 
         public event EventHandler GoRequested;
         public event EventHandler StopRequested;
         public event EventHandler SaveRequested;
@@ -19,6 +18,14 @@ namespace WindowsFormsApplication_with_DLL_Integration
         public event EventHandler RefreshStatus;
 
         public bool IgnoreRunningState => checkBoxIgnoreRunningState.Checked;
+        public bool SaveSilentSegments => checkBoxAutoSave.Checked;
+        public bool ShowTimestamps => checkBoxShowTimestamps.Checked;
+        public bool ShowLineNumbers => checkBoxShowLineNumbers.Checked;
+        public void AppendText(string t) => textBoxOutput.AppendText(t);
+        public string GetText() => textBoxOutput.Text;
+        public void SetText(string t) => textBoxOutput.Text = t;
+
+        private readonly ILogger logger;
 
         public void Initialize()
         {
@@ -27,15 +34,20 @@ namespace WindowsFormsApplication_with_DLL_Integration
             toolTip.SetToolTip(buttonGo, "Elindítja a GO eljárást, ha az még nem fut.");
             toolTip.SetToolTip(buttonStop, "Leállítja a GO eljárást, ha éppen fut.");
             toolTip.SetToolTip(buttonSave, "Menti fájlba a TextBox tartalmát.");
+            toolTip.SetToolTip(labelTextBoxSize, "A TextBox kapacitásának elérésekor a legkorábbi sorok 50%-át törli a rendszer.");
+            toolTip.SetToolTip(checkBoxAutoSave, "Ha aktiválva van, a rendszer a TextBox kapacitástúllépésekor a törlendő sorok 50 %-át naplófájlba menti.");
+
         }
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            logger.InitializeLogger(textBoxOutput,
-            checkBoxShowTimestamps,
-            checkBoxShowLineNumbers,
-            flushIntervalMs: 100,
-            maxChars: 32 * 1024 * 1024);
+            logger.InitializeLogger(
+                view: this,
+                silentFileBaseName: "log",
+                silentFileDirectory: ".\\logs",
+                flushIntervalMs: 100,
+                maxChars: 32 * 1024 * 1024
+            );
         }
 
         private void SetLabelTextSafe(Label lbl, string text)

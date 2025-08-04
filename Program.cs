@@ -21,36 +21,53 @@ namespace WindowsFormsApplication_with_DLL_Integration
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-
-            ServiceProvider = services.BuildServiceProvider();
-
-            var mainPresenter = ServiceProvider.GetRequiredService<IMainPresenter>();
-
-            var view = mainPresenter.Initialize();
-            view.Initialize();
-
-            Application.Run(view);
-
             Application.ThreadException += (sender, args) =>
             {
-                MessageBox.Show("Nem kezelt hiba: " + args.Exception.Message, "Kritikus hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Nem kezelt hiba: {args.Exception.Message}\n\n{args.Exception.StackTrace}",
+                    "Kritikus hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
 
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
-                MessageBox.Show("Végzetes hiba: " + ((Exception)args.ExceptionObject).Message, "Végzetes hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var ex = (Exception)args.ExceptionObject;
+                MessageBox.Show($"Végzetes hiba: {ex.Message}\n\n{ex.StackTrace}",
+                    "Végzetes hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
+
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+
+            ServiceProvider = services.BuildServiceProvider(new ServiceProviderOptions
+            {
+                ValidateScopes = true
+            });
+
+            var mainPresenter = ServiceProvider.GetRequiredService<IMainPresenter>();
+            var view = mainPresenter.Initialize();
+            view.Initialize();
+
+            var batchingLogger = ServiceProvider.GetRequiredService<BatchingLogger>();
+            batchingLogger.InitializeLogger(
+            view: (ILogView)view,
+            silentFileBaseName: "log",
+            silentFileDirectory: ".\\logs",
+            flushIntervalMs: 100,
+            maxChars: 32 * 1024 * 1024
+                );
+            
+            Application.Run(view);
+
+            (ServiceProvider as IDisposable)?.Dispose();
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ILogger, BatchingLogger>();
+            services.AddTransient<ILogView>(sp => sp.GetRequiredService<FormMain>());
             services.AddTransient<ISaveHandler, SaveHandler>();
+            services.AddSingleton<BatchingLogger>();
+            services.AddSingleton<ILogger>(sp => sp.GetRequiredService<BatchingLogger>());
             services.AddTransient<IMainPresenter, MainPresenter>();
             services.AddTransient<IMainView, FormMain>();
-            services.AddTransient<FormMain>();
         }
     }
 }

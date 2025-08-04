@@ -39,14 +39,15 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.grpSingleOperations = new System.Windows.Forms.GroupBox();
             this.grpMultiOperations = new System.Windows.Forms.GroupBox();
+            this.labelTextBoxSize = new System.Windows.Forms.Label();
+            this.numericUpDownTextBoxLength = new System.Windows.Forms.NumericUpDown();
             this.labelTextboxMemory = new System.Windows.Forms.Label();
             this.labelMemory = new System.Windows.Forms.Label();
             this.checkBoxIgnoreRunningState = new System.Windows.Forms.CheckBox();
             this.checkBoxShowTimestamps = new System.Windows.Forms.CheckBox();
             this.checkBoxShowLineNumbers = new System.Windows.Forms.CheckBox();
             this._statusTimer = new System.Windows.Forms.Timer(this.components);
-            this.numericUpDownTextBoxLength = new System.Windows.Forms.NumericUpDown();
-            this.labelTextBoxSize = new System.Windows.Forms.Label();
+            this.checkBoxAutoSave = new System.Windows.Forms.CheckBox();
             this.grpSingleOperations.SuspendLayout();
             this.grpMultiOperations.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTextBoxLength)).BeginInit();
@@ -134,6 +135,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             // 
             this.grpMultiOperations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpMultiOperations.Controls.Add(this.checkBoxAutoSave);
             this.grpMultiOperations.Controls.Add(this.labelTextBoxSize);
             this.grpMultiOperations.Controls.Add(this.numericUpDownTextBoxLength);
             this.grpMultiOperations.Controls.Add(this.labelTextboxMemory);
@@ -147,6 +149,43 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this.grpMultiOperations.TabIndex = 3;
             this.grpMultiOperations.TabStop = false;
             this.grpMultiOperations.Text = "Kiegészítő beállítások";
+            // 
+            // labelTextBoxSize
+            // 
+            this.labelTextBoxSize.AutoSize = true;
+            this.labelTextBoxSize.Location = new System.Drawing.Point(11, 117);
+            this.labelTextBoxSize.Name = "labelTextBoxSize";
+            this.labelTextBoxSize.Size = new System.Drawing.Size(109, 13);
+            this.labelTextBoxSize.TabIndex = 10;
+            this.labelTextBoxSize.Text = "TextBox mérete (MB):";
+            // 
+            // numericUpDownTextBoxLength
+            // 
+            this.numericUpDownTextBoxLength.Increment = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Location = new System.Drawing.Point(126, 115);
+            this.numericUpDownTextBoxLength.Maximum = new decimal(new int[] {
+            256,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Minimum = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.Name = "numericUpDownTextBoxLength";
+            this.numericUpDownTextBoxLength.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownTextBoxLength.TabIndex = 9;
+            this.numericUpDownTextBoxLength.Value = new decimal(new int[] {
+            32,
+            0,
+            0,
+            0});
+            this.numericUpDownTextBoxLength.ValueChanged += new System.EventHandler(this.NumericUpDownTextBoxLength_ValueChanged);
             // 
             // labelTextboxMemory
             // 
@@ -208,42 +247,17 @@ namespace WindowsFormsApplication_with_DLL_Integration
             this._statusTimer.Enabled = true;
             this._statusTimer.Tick += new System.EventHandler(this.StatusTimer_Tick);
             // 
-            // numericUpDownTextBoxLength
+            // checkBoxAutoSave
             // 
-            this.numericUpDownTextBoxLength.Increment = new decimal(new int[] {
-            8,
-            0,
-            0,
-            0});
-            this.numericUpDownTextBoxLength.Location = new System.Drawing.Point(126, 111);
-            this.numericUpDownTextBoxLength.Maximum = new decimal(new int[] {
-            256,
-            0,
-            0,
-            0});
-            this.numericUpDownTextBoxLength.Minimum = new decimal(new int[] {
-            8,
-            0,
-            0,
-            0});
-            this.numericUpDownTextBoxLength.Name = "numericUpDownTextBoxLength";
-            this.numericUpDownTextBoxLength.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDownTextBoxLength.TabIndex = 9;
-            this.numericUpDownTextBoxLength.Value = new decimal(new int[] {
-            32,
-            0,
-            0,
-            0});
-            this.numericUpDownTextBoxLength.ValueChanged += new System.EventHandler(this.NumericUpDownTextBoxLength_ValueChanged);
-            // 
-            // labelTextBoxSize
-            // 
-            this.labelTextBoxSize.AutoSize = true;
-            this.labelTextBoxSize.Location = new System.Drawing.Point(11, 113);
-            this.labelTextBoxSize.Name = "labelTextBoxSize";
-            this.labelTextBoxSize.Size = new System.Drawing.Size(109, 13);
-            this.labelTextBoxSize.TabIndex = 10;
-            this.labelTextBoxSize.Text = "TextBox mérete (MB):";
+            this.checkBoxAutoSave.AutoSize = true;
+            this.checkBoxAutoSave.Checked = true;
+            this.checkBoxAutoSave.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxAutoSave.Location = new System.Drawing.Point(14, 141);
+            this.checkBoxAutoSave.Name = "checkBoxAutoSave";
+            this.checkBoxAutoSave.Size = new System.Drawing.Size(322, 17);
+            this.checkBoxAutoSave.TabIndex = 11;
+            this.checkBoxAutoSave.Text = "TextBox megtelésekor a legkorábbi sorok első felét fájlba menti";
+            this.checkBoxAutoSave.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -286,6 +300,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private System.Windows.Forms.Label labelTextboxMemory;
         private System.Windows.Forms.Label labelTextBoxSize;
         private System.Windows.Forms.NumericUpDown numericUpDownTextBoxLength;
+        private System.Windows.Forms.CheckBox checkBoxAutoSave;
     }
 }
 

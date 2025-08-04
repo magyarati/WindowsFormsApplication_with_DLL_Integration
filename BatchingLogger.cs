@@ -9,37 +9,25 @@ namespace WindowsFormsApplication_with_DLL_Integration
 {
     public class BatchingLogger : ILogger, IDisposable
     {
-        public BatchingLogger(ISaveHandler saveHandler)
-        {
-            this.saveHandler = saveHandler;
-        }
-
-        private ConcurrentQueue<string> queue = new ConcurrentQueue<string>();
-        private TextBox textBox;
+        private readonly ISaveHandler saveHandler;
+        private ILogView view;
         private System.Windows.Forms.Timer flushTimer;
-        private ISaveHandler saveHandler;
         private int maxChars;
-        private int currentChars = 0;
-
+        private int currentChars;
         private string silentFileBaseName;
         private string silentFileDirectory;
-        private int segmentCounter = 0;
+        private int segmentCounter;
+        private int lineCounter;
+        private readonly ConcurrentQueue<string> queue = new ConcurrentQueue<string>();
 
-        private CheckBox checkBoxShowTimestamps;
-        private CheckBox checkBoxShowLineNumbers;
-        private int lineCounter = 1;
-
-        public void InitializeLogger(TextBox textBox,
-            CheckBox checkBoxShowTimestamps,
-            CheckBox checkBoxShowLineNumbers,
+        public void InitializeLogger(
+            ILogView view,
             string silentFileBaseName = "log",
             string silentFileDirectory = ".\\logs",
             int flushIntervalMs = 100,
             int maxChars = 100_000)
         {
-            this.textBox = textBox;
-            this.checkBoxShowTimestamps = checkBoxShowTimestamps;
-            this.checkBoxShowLineNumbers = checkBoxShowLineNumbers;
+            this.view = view ?? throw new ArgumentNullException(nameof(view));
             this.maxChars = maxChars;
             this.silentFileBaseName = silentFileBaseName;
             this.silentFileDirectory = silentFileDirectory;
@@ -55,21 +43,18 @@ namespace WindowsFormsApplication_with_DLL_Integration
 
         public void AppendLine(string text)
         {
-            string linePrefix = "";
-            int currentLine = lineCounter++;
+            var prefix = new StringBuilder();
 
-            if (checkBoxShowLineNumbers?.Checked == true)
-            {
-                linePrefix += $"{currentLine,8}: ";
-            }
+            if (view.ShowLineNumbers)
+                prefix.AppendFormat("{0,8}: ", lineCounter++);
 
-            if (checkBoxShowTimestamps?.Checked == true)
-            {
-                linePrefix += DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] ");
-            }
+            if (view.ShowTimestamps)
+                prefix.Append(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff] "));
 
-            string line = linePrefix + text + Environment.NewLine;
-            queue.Enqueue(line);
+            prefix.Append(text)
+                  .AppendLine();
+
+            queue.Enqueue(prefix.ToString());
         }
 
         private void Flush()
@@ -78,40 +63,44 @@ namespace WindowsFormsApplication_with_DLL_Integration
                 return;
 
             var sb = new StringBuilder();
-            while (queue.TryDequeue(out string line))
+            while (queue.TryDequeue(out var line))
                 sb.Append(line);
 
-            string batch = sb.ToString();
-            AppendToTextBoxWithTrimming(batch);
+            AppendToViewWithTrimming(sb.ToString());
         }
 
-        private void AppendToTextBoxWithTrimming(string batch)
+        private void AppendToViewWithTrimming(string batch)
         {
-            textBox.AppendText(batch);
+            view.AppendText(batch);
             currentChars += batch.Length;
 
             if (currentChars <= maxChars)
                 return;
 
             int threshold = maxChars / 2;
-            string existingText = textBox.Text;
-            int cutIndex = existingText.IndexOf('\n', threshold);
+            string existing = view.GetText();
+            int cutIndex = existing.IndexOf('\n', threshold);
             if (cutIndex < 0)
                 cutIndex = threshold;
             else
                 cutIndex += 1;
 
-            string removedText = existingText.Substring(0, cutIndex);
-            textBox.Text = existingText.Substring(cutIndex);
-            currentChars = textBox.Text.Length;
+            string removed = existing.Substring(0, cutIndex);
+            string kept = existing.Substring(cutIndex);
 
-            string path = GetNextSilentFilePath();
-            _ = saveHandler.SaveLogAsync(
-                removedText,
-                log: _ => { },
-                silent: true,
-                silentFilePath: path
-            );
+            view.SetText(kept);
+            currentChars = kept.Length;
+
+            if (view.SaveSilentSegments)
+            {
+                string path = GetNextSilentFilePath();
+                _ = saveHandler.SaveLogAsync(
+                    removed,
+                    log: AppendLine,
+                    silent: true,
+                    silentFilePath: path
+                );
+            }
         }
 
         private string GetNextSilentFilePath()
@@ -121,12 +110,9 @@ namespace WindowsFormsApplication_with_DLL_Integration
             return Path.Combine(silentFileDirectory, fileName);
         }
 
-        public int GetCurrentTextSize() => textBox.Text.Length;
+        public int GetCurrentTextSize() => view.GetText().Length;
 
-        public void SetMaxChars(int newMax)
-        {
-            maxChars = newMax;
-        }
+        public void SetMaxChars(int newMax) => maxChars = newMax;
 
         public void Dispose()
         {

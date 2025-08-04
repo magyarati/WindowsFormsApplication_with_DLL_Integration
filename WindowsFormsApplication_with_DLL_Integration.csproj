@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="GetIDWorker.cs" />
     <Compile Include="ILogger.cs" />
+    <Compile Include="ILogView.cs" />
     <Compile Include="IMainPresenter.cs" />
     <Compile Include="IMainView.cs" />
     <Compile Include="ISaveHandler.cs" />
