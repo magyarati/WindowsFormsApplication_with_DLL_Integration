@@ -120,6 +120,12 @@ namespace WindowsFormsApplication_with_DLL_Integration
         {
             try
             {
+                if (_singleWorker == null)
+                {
+                    _logger?.AppendLine("[HIBA] NULLLLLLL");
+                    return;
+                }
+
                 if (_singleWorker.Running || _view.IgnoreRunningState)
                 {
                     _singleWorker.Stop();

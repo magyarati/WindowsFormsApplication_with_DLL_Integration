@@ -9,7 +9,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
 {
     public class BatchingLogger : ILogger, IDisposable
     {
-        private readonly ISaveHandler saveHandler;
+        private ISaveHandler saveHandler;
         private ILogView view;
         private System.Windows.Forms.Timer flushTimer;
         private int maxChars;
@@ -20,6 +20,11 @@ namespace WindowsFormsApplication_with_DLL_Integration
         private int lineCounter;
         private readonly ConcurrentQueue<string> queue = new ConcurrentQueue<string>();
 
+        public BatchingLogger(ISaveHandler saveHandler)
+        {
+            this.saveHandler = saveHandler;
+        }
+        
         public void InitializeLogger(
             ILogView view,
             string silentFileBaseName = "log",
@@ -27,7 +32,7 @@ namespace WindowsFormsApplication_with_DLL_Integration
             int flushIntervalMs = 100,
             int maxChars = 100_000)
         {
-            this.view = view ?? throw new ArgumentNullException(nameof(view));
+            this.view = view;
             this.maxChars = maxChars;
             this.silentFileBaseName = silentFileBaseName;
             this.silentFileDirectory = silentFileDirectory;
